@@ -9,6 +9,7 @@ from typing import Any
 # Add parent directory to path to import shared
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../../..'))
 
+from .providers.bedrock_provider import BedrockProvider
 from .providers.google_provider import GoogleProvider
 from .providers.llm_provider_base import LLMProviderBase
 from .providers.openai_provider import OpenAIProvider
@@ -19,6 +20,7 @@ class LLMFactory:
 
     # Registry of available providers
     _providers: dict[str, type[LLMProviderBase]] = {
+        "bedrock": BedrockProvider,
         "google": GoogleProvider,
         "openai": OpenAIProvider,
     }
@@ -49,22 +51,9 @@ class LLMFactory:
         if not api_key:
             api_key = cls._get_api_key(provider_name)
 
-        if not api_key:
+        # Bedrock uses IAM role, doesn't need API key
+        if not api_key and provider_name != "bedrock":
             raise ValueError(f"API key not found for provider '{provider_name}'")
-
-        # Get enable_mock_llm from settings if not provided in kwargs
-        if "enable_mock_llm" not in kwargs:
-            try:
-                from shared.config.settings import get_core_settings
-                settings = get_core_settings()
-                kwargs["enable_mock_llm"] = settings.enable_mock_llm
-            except Exception:
-                # Fallback to environment variable if settings not available
-                env_value = os.getenv("ENABLE_MOCK_LLM")
-                if env_value is not None:
-                    kwargs["enable_mock_llm"] = env_value.lower() == "true"
-                else:
-                    kwargs["enable_mock_llm"] = False
 
         return provider_class(api_key=api_key, **kwargs)
 
@@ -72,6 +61,7 @@ class LLMFactory:
     def _get_api_key(cls, provider_name: str) -> str:
         """Get API key from environment variables"""
         key_mapping = {
+            "bedrock": "",  # Uses IAM role, no API key needed
             "google": "GOOGLE_API_KEY",
             "openai": "OPENAI_API_KEY",
         }

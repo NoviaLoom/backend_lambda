@@ -197,7 +197,7 @@ class LLMQueueService:
                         processing_time = time.time() - start_time
                         self._update_success_metrics(processing_time)
 
-                        logger.info(f"✅ Worker {worker_id} completed request successfully in {processing_time:.2f}s (attempt {current_attempt})")
+                        logger.info(f"Worker {worker_id} completed request successfully in {processing_time:.2f}s (attempt {current_attempt})")
 
                         # Retourner le résultat via le Future
                         if not queued_request.future.done():
@@ -212,14 +212,14 @@ class LLMQueueService:
                             # Backoff exponentiel: 2^(attempt-1) secondes (1s, 2s, 4s, etc.)
                             backoff_time = min(2 ** (current_attempt - 1), 30)  # Max 30s
 
-                            logger.warning(f"⚠️ Worker {worker_id} attempt {current_attempt} failed: {str(e)}")
-                            logger.info(f"🔄 Worker {worker_id} retrying in {backoff_time}s... (remaining attempts: {queued_request.max_retries - current_attempt})")
+                            logger.warning(f"Worker {worker_id} attempt {current_attempt} failed: {str(e)}")
+                            logger.info(f"Worker {worker_id} retrying in {backoff_time}s... (remaining attempts: {queued_request.max_retries - current_attempt})")
 
                             self._metrics["retried_requests"] += 1
                             await asyncio.sleep(backoff_time)
                         else:
                             # Toutes les tentatives échouées
-                            logger.error(f"❌ Worker {worker_id} all {queued_request.max_retries} attempts failed: {str(e)}")
+                            logger.error(f"Worker {worker_id} all {queued_request.max_retries} attempts failed: {str(e)}")
                             self._metrics["failed_requests"] += 1
 
                             if not queued_request.future.done():
@@ -228,7 +228,7 @@ class LLMQueueService:
 
                     except Exception as e:
                         # Erreur non-retriable (pas un LLMProviderError)
-                        logger.error(f"❌ Worker {worker_id} non-retriable error (attempt {queued_request.attempt + 1}): {str(e)}")
+                        logger.error(f"Worker {worker_id} non-retriable error (attempt {queued_request.attempt + 1}): {str(e)}")
                         logger.exception(e)  # Stack trace complète
                         self._metrics["failed_requests"] += 1
 
@@ -239,7 +239,7 @@ class LLMQueueService:
                 # Si on sort de la boucle sans succès, toutes les tentatives sont épuisées
                 if not queued_request.future.done():
                     error_msg = f"All {queued_request.max_retries} attempts exhausted without success"
-                    logger.error(f"❌ Worker {worker_id}: {error_msg}")
+                    logger.error(f"Worker {worker_id}: {error_msg}")
                     queued_request.future.set_exception(LLMProviderError(message=error_msg))
 
             finally:

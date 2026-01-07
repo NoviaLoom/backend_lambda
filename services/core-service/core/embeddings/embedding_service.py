@@ -46,7 +46,7 @@ class EmbeddingService:
             model_kwargs={"output_dimensionality": 768}
         )
 
-        logger.info("✅ EmbeddingService initialized (gemini-embedding-001, 768D)")
+        logger.info("EmbeddingService initialized (gemini-embedding-001, 768D)")
 
     def embed_document(self, text: str) -> List[float]:
         """

@@ -25,12 +25,6 @@ class CoreServiceSettings(BaseServiceSettings):
         description="OpenAI API key"
     )
 
-    # Mock mode for development
-    enable_mock_llm: bool = Field(
-        default=False,
-        description="Enable mock LLM responses (for testing without API keys)"
-    )
-
     @field_validator("google_api_key", "openai_api_key")
     @classmethod
     def validate_api_keys(cls, v: Optional[str]) -> Optional[str]:

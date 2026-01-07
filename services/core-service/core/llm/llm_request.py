@@ -19,19 +19,19 @@ class LLMRequest(BaseModel):
     messages: list[dict[str, str]] | None = Field(None, description="Chat messages format")
     stream: bool = Field(False, description="Whether to stream the response")
 
-    # ✅ NOUVEAU : Support Google Search
+    # Google Search support
     use_search: bool = Field(
         False,
         description="Enable Google Search grounding (Gemini only)"
     )
 
-    # ✅ NOUVEAU : Support Google Maps
+    # Google Maps support
     use_maps: bool = Field(
         False,
         description="Enable Google Maps grounding (Gemini only)"
     )
 
-    # ✅ NOUVEAU : Configuration avancée
+    # Advanced grounding configuration
     grounding_config: dict[str, Any] | None = Field(
         None,
         description="Advanced grounding configuration"
@@ -47,8 +47,8 @@ class LLMRequest(BaseModel):
                 "model": "gemini-1.5-pro",
                 "temperature": 0.1,
                 "max_tokens": 32000,
-                "use_search": True,  # ✅ Activer Google Search
-                "use_maps": True,    # ✅ Activer Google Maps
+                "use_search": True,  # Enable Google Search
+                "use_maps": True,    # Enable Google Maps
                 "system_message": "You are a retail data analyst"
             }
         }

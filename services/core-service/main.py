@@ -55,7 +55,7 @@ async def lifespan(app: FastAPI):
         port=settings.port,
         google_api_configured=settings.google_api_key is not None,
         openai_api_configured=settings.openai_api_key is not None,
-        mock_mode=settings.enable_mock_llm
+        bedrock_configured=True  # Bedrock uses IAM role
     )
 
     yield
@@ -88,18 +88,18 @@ async def check_llm_providers():
     """Check if LLM providers are properly configured."""
     has_google = settings.google_api_key is not None
     has_openai = settings.openai_api_key is not None
-    mock_enabled = settings.enable_mock_llm
+    has_bedrock = True  # Bedrock uses IAM role, always available in Lambda
 
-    if not has_google and not has_openai and not mock_enabled:
+    if not has_google and not has_openai and not has_bedrock:
         return {
             "status": "unhealthy",
-            "error": "No LLM providers configured. Set GOOGLE_API_KEY, OPENAI_API_KEY, or ENABLE_MOCK_LLM=true"
+            "error": "No LLM providers configured"
         }
 
     providers_status = {
         "google": "available" if has_google else "not_configured",
         "openai": "available" if has_openai else "not_configured",
-        "mock": "enabled" if mock_enabled else "disabled"
+        "bedrock": "available",  # Always available with IAM role
     }
 
     return {
@@ -142,3 +142,15 @@ if __name__ == "__main__":
         reload=settings.is_development,  # Auto-reload only in development
         access_log=False  # Désactiver les logs d'accès Uvicorn (géré par notre middleware)
     )
+
+
+# ============================================
+# Lambda Handler (for AWS Lambda deployment)
+# ============================================
+try:
+    from mangum import Mangum
+    # lifespan="off" prevents Lambda timeout issues with startup/shutdown events
+    handler = Mangum(app, lifespan="off")
+except ImportError:
+    # Mangum not installed, skip Lambda handler (local dev)
+    handler = None  # type: ignore

@@ -1,0 +1,59 @@
+# Python cache (77MB .mypy_cache + others)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+*.md
+!requirements*.txt
+
+# Development files
+.env
+.env.local
+.env.example
+.env.test
+
+# Mock data (removed in Phase 2)
+mocks/
+analyzer_results.json
+captation_results.json
+
+# Tests
+tests/
+test_*.py
+*_test.py
+pytest.ini
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# Logs
+*.log
+logs/

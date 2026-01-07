@@ -14,9 +14,6 @@ RUN pip install --no-cache-dir -e /shared
 # Copy application code (needed before installing package)
 COPY ./core-service/ .
 
-# Copy mock data files for development
-COPY ./core-service/mocks /app/mocks
-
 # Install service dependencies
 RUN pip install --no-cache-dir -e .
 
@@ -36,4 +33,8 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8001/health || exit 1
 
 # Run the application
+# For local development: use uvicorn via entrypoint.sh
 CMD ["/entrypoint.sh"]
+
+# For Lambda deployment: AWS overrides CMD with Lambda runtime
+# Lambda CMD will be: ["main.handler"] (configured in Lambda function settings)
